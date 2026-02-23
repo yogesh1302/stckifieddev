@@ -78,20 +78,32 @@ const WritePage = () => {
       .replace(/^-+|-+$/g, "");
 
   const handleSubmit = async () => {
-    const res = await fetch("/api/posts", {
-      method: "POST",
-      body: JSON.stringify({
-        title,
-        desc: value,
-        img: media,
-        slug: slugify(title),
-        catSlug: catSlug || "style", //If not selected, choose the general category
-      }),
-    });
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          desc: value,
+          img: media,
+          slug: slugify(title),
+          catSlug: catSlug || "style", //If not selected, choose the general category
+        }),
+      });
 
-    if (res.status === 200) {
       const data = await res.json();
-      router.push(`/posts/${data.slug}`);
+
+      if (res.status === 200) {
+        router.push(`/posts/${data.slug}`);
+      } else {
+        console.error("Error:", data);
+        alert(`Error: ${data.message || "Failed to create post"}`);
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("Failed to publish post. Please check console for details.");
     }
   };
 
